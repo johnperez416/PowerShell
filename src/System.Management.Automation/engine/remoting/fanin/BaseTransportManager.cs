@@ -195,7 +195,7 @@ namespace System.Management.Automation.Remoting
     {
         #region tracer
 
-        [TraceSourceAttribute("Transport", "Traces BaseWSManTransportManager")]
+        [TraceSource("Transport", "Traces BaseWSManTransportManager")]
         private static readonly PSTraceSource s_baseTracer = PSTraceSource.GetTracer("Transport", "Traces BaseWSManTransportManager");
 
         #endregion
@@ -363,8 +363,9 @@ namespace System.Management.Automation.Remoting
             if (!shouldProcess)
             {
                 // we dont support this stream..so ignore the data
-                Dbg.Assert(false,
-                    string.Format(CultureInfo.InvariantCulture, "Data should be from one of the streams : {0} or {1} or {2}",
+                Dbg.Assert(false, string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Data should be from one of the streams : {0} or {1} or {2}",
                     WSManNativeApi.WSMAN_STREAM_ID_STDIN,
                     WSManNativeApi.WSMAN_STREAM_ID_STDOUT,
                     WSManNativeApi.WSMAN_STREAM_ID_PROMPTRESPONSE));
@@ -471,7 +472,7 @@ namespace System.Management.Automation.Remoting.Client
     public abstract class BaseClientTransportManager : BaseTransportManager, IDisposable
     {
         #region Tracer
-        [TraceSourceAttribute("ClientTransport", "Traces ClientTransportManager")]
+        [TraceSource("ClientTransport", "Traces ClientTransportManager")]
         internal static PSTraceSource tracer = PSTraceSource.GetTracer("ClientTransport", "Traces ClientTransportManager");
         #endregion
 

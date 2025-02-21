@@ -5,7 +5,12 @@ param()
 
 Describe "Behavior is specific for each platform" -tags "CI" {
     It "PSNativeCommandArgumentPassing is set to 'Windows' on Windows systems" -skip:(-not $IsWindows) {
-        $PSNativeCommandArgumentPassing | Should -Be "Windows"
+        if ([Version]::TryParse($PSVersiontable.PSVersion.ToString(), [ref]$null)) {
+            $PSNativeCommandArgumentPassing | Should -BeExactly "Legacy"
+        }
+        else {
+            $PSNativeCommandArgumentPassing | Should -BeExactly "Windows"
+        }
     }
     It "PSNativeCommandArgumentPassing is set to 'Standard' on non-Windows systems" -skip:($IsWindows) {
         $PSNativeCommandArgumentPassing | Should -Be "Standard"
@@ -162,7 +167,7 @@ Describe "Will error correctly if an attempt to set variable to improper value" 
     }
 }
 
-Describe "find.exe uses legacy behavior on Windows" {
+Describe "find.exe uses legacy behavior on Windows" -Tag 'CI' {
     BeforeAll {
         $currentSetting = $PSNativeCommandArgumentPassing
         $PSNativeCommandArgumentPassing = "Windows"

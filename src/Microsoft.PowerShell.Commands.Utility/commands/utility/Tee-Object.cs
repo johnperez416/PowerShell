@@ -78,10 +78,10 @@ namespace Microsoft.PowerShell.Commands
         /// </summary>
         [Parameter(ParameterSetName = "File")]
         [Parameter(ParameterSetName = "LiteralFile")]
-        [ArgumentToEncodingTransformationAttribute]
-        [ArgumentEncodingCompletionsAttribute]
+        [ArgumentToEncodingTransformation]
+        [ArgumentEncodingCompletions]
         [ValidateNotNullOrEmpty]
-        public Encoding Encoding { get; set; } = ClrFacade.GetDefaultEncoding();
+        public Encoding Encoding { get; set; } = Encoding.Default;
 
         /// <summary>
         /// Variable parameter.

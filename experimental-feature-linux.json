@@ -1,6 +1,8 @@
 [
-  "PSCommandNotFoundSuggestion",
+  "PSFeedbackProvider",
   "PSLoadAssemblyFromNativeCode",
-  "PSNativeCommandErrorActionPreference",
+  "PSNativeWindowsTildeExpansion",
+  "PSSerializeJSONLongEnumAsNumber",
+  "PSRedirectToVariable",
   "PSSubsystemPluginModel"
 ]
