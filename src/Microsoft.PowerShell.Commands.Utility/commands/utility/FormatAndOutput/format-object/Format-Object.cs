@@ -8,9 +8,10 @@ using Microsoft.PowerShell.Commands.Internal.Format;
 namespace Microsoft.PowerShell.Commands
 {
     /// <summary>
-    /// Implementation for the format-custom command. It just calls the formatting engine on complex shape.
+    /// Implementation for the Format-Custom command. It just calls the formatting engine on complex shape.
     /// </summary>
     [Cmdlet(VerbsCommon.Format, "Custom", HelpUri = "https://go.microsoft.com/fwlink/?LinkID=2096929")]
+    [OutputType(typeof(FormatStartData), typeof(FormatEntryData), typeof(FormatEndData), typeof(GroupStartData), typeof(GroupEndData))]
     public class FormatCustomCommand : OuterFormatShapeCommandBase
     {
         /// <summary>
@@ -43,7 +44,7 @@ namespace Microsoft.PowerShell.Commands
         /// <summary>
         /// </summary>
         /// <value></value>
-        [ValidateRangeAttribute(1, int.MaxValue)]
+        [ValidateRange(1, int.MaxValue)]
         [Parameter]
         public int Depth
         {

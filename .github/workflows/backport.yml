@@ -2,65 +2,77 @@ name: Backport PR to branch
 on:
   issue_comment:
     types: [created]
+  schedule:
+    # once a day at 13:00 UTC to cleanup old runs
+    - cron: '0 13 * * *'
 
 permissions:
   contents: write
   issues: write
   pull-requests: write
+  actions: write
 
 jobs:
-  backport:
-    if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/backport to')
-    runs-on: ubuntu-20.04
+  label:
+    if: ${{ contains(github.event.comment.body, '/backport to') }}
+    runs-on: ubuntu-latest
     steps:
-    - name: Extract backport target branch
-      uses: actions/github-script@v6
-      id: target-branch-extractor
-      with:
-        result-encoding: string
-        script: |
-          if (context.eventName !== "issue_comment") throw "Error: This action only works on issue_comment events.";
+      - name: Add Label
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const comment = context.payload.comment.body;
+            const match = comment.match(/\/backport to release\/v(\d+\.\d+)$/);
+            if (match) {
+              const version = match[1];
+              const label = `Backport-${version}.x-Consider`;
+              console.log(label);
 
-          // extract the target branch name from the trigger phrase containing these characters: a-z, A-Z, digits, forward slash, dot, hyphen, underscore
-          const regex = /^\/backport to ([a-zA-Z\d\/\.\-\_]+)/;
-          target_branch = regex.exec(context.payload.comment.body);
-          if (target_branch == null) throw "Error: No backport branch found in the trigger phrase.";
+              // Add the label to the issue
+              await github.rest.issues.addLabels({
+                ...context.repo,
+                issue_number: context.issue.number,
+                labels: [label],
+              });
+            } else {
+              throw new Error("No version found in comment.  Expected: /backport to release/vN.N");
+            }
+  backport:
+    if: ${{ contains(github.event.comment.body, '/backport to') || github.event_name == 'schedule' }}
+    # validates our branch format and that the issue is labeled before backport
+    needs: label
+    uses: dotnet/arcade/.github/workflows/backport-base.yml@main
+    with:
+      repository_owners: 'powershell,travisez13'
+      pr_description_template: |
+        Backport of #%source_pr_number% to %target_branch%
 
-          return target_branch[1];
-    - name: Post backport started comment to pull request
-      uses: actions/github-script@v6
-      continue-on-error: true
-      with:
-        script: |
-          const backport_start_body = `Started backporting to ${{ steps.target-branch-extractor.outputs.result }}: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-          console.log(`issue_number: ${context.issue.number}`);
-          console.log(`owner: ${context.repo.owner}`);
-          console.log(`repo: ${context.repo.repo}`);
-          console.log(`body: ${backport_start_body}`);
-          await github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: backport_start_body
-          });
-    - name: Checkout repo
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Run backport
-      uses: ./tools/actions/backport
-      with:
-        target_branch: ${{ steps.target-branch-extractor.outputs.result }}
-        auth_token: ${{ secrets.GITHUB_TOKEN }}
-        pr_description_template: |
-          Backport of #%source_pr_number% to %target_branch%
+        <!--
+        DO NOT MODIFY THIS COMMENT. IT IS AUTO-GENERATED.
+        $$$originalpr:%source_pr_number%$$$
+        -->
 
-          /cc %cc_users%
+        /cc %cc_users%
 
-          ## Customer Impact
+        ## Customer Impact
 
-          ## Testing
+        - [ ] Customer reported
+        - [ ] Found internally
 
-          - [ ] For any change that affects the release process, please work with a maintainer to come up with a plan to test this.
+        [Select one or both of the boxes. Describe how this issue impacts customers, citing the expected and actual behaviors and scope of the issue. If customer-reported, provide the issue number.]
 
-          ## Risk
+        ## Regression
+
+        - [ ] Yes
+        - [ ] No
+
+        [If yes, specify when the regression was introduced. Provide the PR or commit if known.]
+
+        ## Testing
+
+        [How was the fix verified? How was the issue missed previously? What tests were added?]
+
+        ## Risk
+
+        [High/Medium/Low. Justify the indication by mentioning how risks were measured and addressed.]
+

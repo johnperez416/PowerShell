@@ -255,7 +255,7 @@ namespace Microsoft.PowerShell
         /// the advantage is portability through abstraction. Does not support
         /// arrow key movement, but supports backspace.
         /// </summary>
-        ///<param name="isSecureString">
+        /// <param name="isSecureString">
         /// True to specify reading a SecureString; false reading a string
         /// </param>
         /// <param name="printToken">
@@ -1206,9 +1206,6 @@ namespace Microsoft.PowerShell
         /// </exception>
         public override void WriteDebugLine(string message)
         {
-            // don't lock here as WriteLine is already protected.
-            message = HostUtilities.RemoveGuidFromMessage(message, out _);
-
             // We should write debug to error stream only if debug is redirected.)
             if (_parent.ErrorFormat == Serialization.DataFormat.XML)
             {
@@ -1266,9 +1263,6 @@ namespace Microsoft.PowerShell
         /// </exception>
         public override void WriteVerboseLine(string message)
         {
-            // don't lock here as WriteLine is already protected.
-            message = HostUtilities.RemoveGuidFromMessage(message, out _);
-
             // NTRAID#Windows OS Bugs-1061752-2004/12/15-sburns should read a skin setting here...)
             if (_parent.ErrorFormat == Serialization.DataFormat.XML)
             {
@@ -1309,9 +1303,6 @@ namespace Microsoft.PowerShell
         /// </exception>
         public override void WriteWarningLine(string message)
         {
-            // don't lock here as WriteLine is already protected.
-            message = HostUtilities.RemoveGuidFromMessage(message, out _);
-
             // NTRAID#Windows OS Bugs-1061752-2004/12/15-sburns should read a skin setting here...)
             if (_parent.ErrorFormat == Serialization.DataFormat.XML)
             {
@@ -1340,20 +1331,6 @@ namespace Microsoft.PowerShell
         {
             Dbg.Assert(record != null, "WriteProgress called with null ProgressRecord");
 
-            if (Console.IsOutputRedirected)
-            {
-                // Do not write progress bar when the stdout is redirected.
-                return;
-            }
-
-            bool matchPattern;
-            string currentOperation = HostUtilities.RemoveIdentifierInfoFromMessage(record.CurrentOperation, out matchPattern);
-            if (matchPattern)
-            {
-                record = new ProgressRecord(record) { CurrentOperation = currentOperation };
-            }
-
-            // We allow only one thread at a time to update the progress state.)
             if (_parent.ErrorFormat == Serialization.DataFormat.XML)
             {
                 PSObject obj = new PSObject();
@@ -1361,8 +1338,14 @@ namespace Microsoft.PowerShell
                 obj.Properties.Add(new PSNoteProperty("Record", record));
                 _parent.ErrorSerializer.Serialize(obj, "progress");
             }
+            else if (Console.IsOutputRedirected)
+            {
+                // Do not write progress bar when the stdout is redirected.
+                return;
+            }
             else
             {
+                // We allow only one thread at a time to update the progress state.)
                 lock (_instanceLock)
                 {
                     HandleIncomingProgressRecord(sourceId, record);
@@ -1491,7 +1474,10 @@ namespace Microsoft.PowerShell
             result = ReadLineResult.endedOnEnter;
 
             // If the test hook is set, read from it.
-            if (s_h != null) return s_h.ReadLine();
+            if (s_h != null)
+            {
+                return s_h.ReadLine();
+            }
 
             string restOfLine = null;
 
@@ -1536,14 +1522,21 @@ namespace Microsoft.PowerShell
                 }
 
                 var c = unchecked((char)inC);
-                if (!NoPrompt) Console.Out.Write(c);
+                if (!NoPrompt)
+                {
+                    Console.Out.Write(c);
+                }
 
                 if (c == '\r')
                 {
                     // Treat as newline, but consume \n if there is one.
                     if (consoleIn.Peek() == '\n')
                     {
-                        if (!NoPrompt) Console.Out.Write('\n');
+                        if (!NoPrompt)
+                        {
+                            Console.Out.Write('\n');
+                        }
+
                         consoleIn.Read();
                     }
 
@@ -1910,22 +1903,24 @@ namespace Microsoft.PowerShell
 #endif
 
         /// <summary>
-        /// Strip nulls from a string...
+        /// Strip nulls from a string.
         /// </summary>
         /// <param name="input">The string to process.</param>
-        /// <returns>The string with any \0 characters removed...</returns>
+        /// <returns>The string with any '\0' characters removed.</returns>
         private static string RemoveNulls(string input)
         {
-            if (input.Contains('\0'))
+            if (!input.Contains('\0'))
             {
                 return input;
             }
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(input.Length);
             foreach (char c in input)
             {
                 if (c != '\0')
+                {
                     sb.Append(c);
+                }
             }
 
             return sb.ToString();
@@ -2255,7 +2250,7 @@ namespace Microsoft.PowerShell
         private readonly ConsoleHostRawUserInterface _rawui;
         private readonly ConsoleHost _parent;
 
-        [TraceSourceAttribute("ConsoleHostUserInterface", "Console host's subclass of S.M.A.Host.Console")]
+        [TraceSource("ConsoleHostUserInterface", "Console host's subclass of S.M.A.Host.Console")]
         private static readonly PSTraceSource s_tracer = PSTraceSource.GetTracer("ConsoleHostUserInterface", "Console host's subclass of S.M.A.Host.Console");
     }
 }   // namespace

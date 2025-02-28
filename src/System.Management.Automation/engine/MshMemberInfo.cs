@@ -28,8 +28,8 @@ namespace System.Management.Automation
     /// <summary>
     /// Enumerates all possible types of members.
     /// </summary>
-    [TypeConverterAttribute(typeof(LanguagePrimitives.EnumMultipleTypeConverter))]
-    [FlagsAttribute()]
+    [TypeConverter(typeof(LanguagePrimitives.EnumMultipleTypeConverter))]
+    [Flags]
     public enum PSMemberTypes
     {
         /// <summary>
@@ -120,8 +120,8 @@ namespace System.Management.Automation
     /// <summary>
     /// Enumerator for all possible views available on a PSObject.
     /// </summary>
-    [TypeConverterAttribute(typeof(LanguagePrimitives.EnumMultipleTypeConverter))]
-    [FlagsAttribute()]
+    [TypeConverter(typeof(LanguagePrimitives.EnumMultipleTypeConverter))]
+    [Flags]
     public enum PSMemberViewTypes
     {
         /// <summary>
@@ -148,7 +148,7 @@ namespace System.Management.Automation
     /// <summary>
     /// Match options.
     /// </summary>
-    [FlagsAttribute]
+    [Flags]
     internal enum MshMemberMatchOptions
     {
         /// <summary>
@@ -2009,7 +2009,7 @@ namespace System.Management.Automation
         }
 
         public override int GetHashCode()
-            => HashCode.Combine(MethodTargetType, ParameterTypes, GenericTypeParameters);
+            => HashCode.Combine(MethodTargetType, ParameterTypes.SequenceGetHashCode(), GenericTypeParameters.SequenceGetHashCode());
 
         public override string ToString()
         {
@@ -3365,8 +3365,7 @@ namespace System.Management.Automation
                                     break;
                                 default:
                                     Diagnostics.Assert(false,
-                                        string.Format(CultureInfo.InvariantCulture,
-                                            "PSInternalMemberSet cannot process {0}", name));
+                                        string.Create(CultureInfo.InvariantCulture, $"PSInternalMemberSet cannot process {name}"));
                                     break;
                             }
                         }

@@ -11,7 +11,7 @@ namespace System.Management.Automation
     internal static class PlatformInvokes
     {
         [StructLayout(LayoutKind.Sequential)]
-        internal class FILETIME
+        internal sealed class FILETIME
         {
             internal uint dwLowDateTime;
             internal uint dwHighDateTime;
@@ -92,7 +92,7 @@ namespace System.Management.Automation
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal class SecurityAttributes
+        internal sealed class SecurityAttributes
         {
             internal int nLength;
             internal SafeLocalMemHandle lpSecurityDescriptor;
@@ -487,7 +487,7 @@ namespace System.Management.Automation
 
         /// <summary>
         /// Retrieves the current process token.
-        /// This function exists just for backward compatibility. It is prefered to use the other override that takes 'SafeHandle' as parameter.
+        /// This function exists just for backward compatibility. It is preferred to use the other override that takes 'SafeHandle' as parameter.
         /// </summary>
         /// <param name="processHandle">Process handle.</param>
         /// <param name="desiredAccess">Token access.</param>
@@ -536,7 +536,7 @@ namespace System.Management.Automation
         internal static readonly UInt32 OPEN_EXISTING = 3;
 
         [StructLayout(LayoutKind.Sequential)]
-        internal class PROCESS_INFORMATION
+        internal sealed class PROCESS_INFORMATION
         {
             public IntPtr hProcess;
             public IntPtr hThread;
@@ -581,7 +581,7 @@ namespace System.Management.Automation
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal class STARTUPINFO
+        internal sealed class STARTUPINFO
         {
             public int cb;
             public IntPtr lpReserved;
@@ -645,7 +645,7 @@ namespace System.Management.Automation
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal class SECURITY_ATTRIBUTES
+        internal sealed class SECURITY_ATTRIBUTES
         {
             public int nLength;
             public SafeLocalMemHandle lpSecurityDescriptor;
@@ -677,16 +677,6 @@ namespace System.Management.Automation
         public static extern uint ResumeThread(IntPtr threadHandle);
 
         internal static readonly uint RESUME_THREAD_FAILED = System.UInt32.MaxValue; // (DWORD)-1
-
-        [DllImport(PinvokeDllNames.CreateFileDllName, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern System.IntPtr CreateFileW(
-            [In, MarshalAs(UnmanagedType.LPWStr)] string lpFileName,
-            UInt32 dwDesiredAccess,
-            UInt32 dwShareMode,
-            SECURITY_ATTRIBUTES lpSecurityAttributes,
-            UInt32 dwCreationDisposition,
-            UInt32 dwFlagsAndAttributes,
-            System.IntPtr hTemplateFile);
 
 #endif
 

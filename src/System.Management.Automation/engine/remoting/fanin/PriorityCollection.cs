@@ -98,7 +98,7 @@ namespace System.Management.Automation.Remoting
                 Dbg.Assert(value != null, "Fragmentor cannot be null.");
                 _fragmentor = value;
                 // create serialized streams using fragment size.
-                string[] names = Enum.GetNames(typeof(DataPriorityType));
+                string[] names = Enum.GetNames<DataPriorityType>();
                 _dataToBeSent = new SerializedDataStream[names.Length];
                 _dataSyncObjects = new object[names.Length];
                 for (int i = 0; i < names.Length; i++)
@@ -301,7 +301,7 @@ namespace System.Management.Automation.Remoting
     {
         #region tracer
 
-        [TraceSourceAttribute("Transport", "Traces BaseWSManTransportManager")]
+        [TraceSource("Transport", "Traces BaseWSManTransportManager")]
         private static readonly PSTraceSource s_baseTracer = PSTraceSource.GetTracer("Transport", "Traces BaseWSManTransportManager");
 
         #endregion
@@ -765,7 +765,7 @@ namespace System.Management.Automation.Remoting
         internal PriorityReceiveDataCollection(Fragmentor defragmentor, bool createdByClientTM)
         {
             _defragmentor = defragmentor;
-            string[] names = Enum.GetNames(typeof(DataPriorityType));
+            string[] names = Enum.GetNames<DataPriorityType>();
             _recvdData = new ReceiveDataCollection[names.Length];
             for (int index = 0; index < names.Length; index++)
             {
